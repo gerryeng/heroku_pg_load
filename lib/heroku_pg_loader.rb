@@ -6,7 +6,7 @@ class HerokuPgLoader
 	def start
 		begin
 			get_app_name
-			get_development_database
+			get_database_details
 
 			load_database
 
@@ -15,7 +15,7 @@ class HerokuPgLoader
 			puts "Error: #{e}"
 		ensure
 			dump_file.close
-			dump_file.delete
+			File.delete(dump_file)
 		end
 	end
 
@@ -57,7 +57,7 @@ class HerokuPgLoader
 		output
 	end
 
-	def get_development_database
+	def get_database_details
 
 		# Read database.yml
 		db_config = YAML.load_file("#{working_dir}/config/database.yml")
@@ -70,20 +70,20 @@ class HerokuPgLoader
 		end
 
 		@db_name = prompt "Local Database Name:\n (WARNING: THIS DATABASE WILL BE ERASED)",
-		@db_name,
-		"Database name not entered"
+				@db_name,
+				"Database name not entered"
 
 		@db_username = prompt "Database Username:",
-		@db_username,
-		"Database username not entered"
+				@db_username,
+				"Database username not entered"
 
 		@db_password = prompt "Database Password:",
-		@db_password,
-		"Database Password not entered"
+				@db_password,
+				"Database Password not entered"
 	end
 
 	def working_dir
-		File.expand_path File.dirname(__FILE__)
+		 Dir.getwd
 	end
 
 	def prompt(message, current_value, error_message)
