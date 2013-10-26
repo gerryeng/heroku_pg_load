@@ -14,11 +14,6 @@ A simple command line utility that downloads your Heroku Postgres live database 
 
 ## How to Use
 
-Go to the directory where your heroku app is at and run:
-
-    heroku_pg_load
-
-
 The utility will attempt to detect the heroku app and database settings from directory. Follow the prompts.
 
     $ cd my_heroku_project_directory
