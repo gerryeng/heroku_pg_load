@@ -43,7 +43,6 @@ class HerokuPgLoader
 	def dump_file
 		if @dump_file.nil?
 			path = "#{working_dir}/latest.dump"
-			puts "Creating dump file #{path}"
 			@dump_file = File.open(path, 'w')
 		end
 		@dump_file
@@ -59,31 +58,40 @@ class HerokuPgLoader
 
 	def get_database_details
 
-		# Read database.yml
-		db_config = YAML.load_file("#{working_dir}/config/database.yml")
-
-		dev_config = db_config["development"]
-		if dev_config["adapter"] == "postgresql"
-			@db_name = dev_config["database"]
-			@db_username = dev_config["username"]
-			@db_password = dev_config["password"]
-		end
+		guess_database_from_rails_config
 
 		@db_name = prompt "Local Database Name:\n (WARNING: THIS DATABASE WILL BE ERASED)",
-				@db_name,
-				"Database name not entered"
+		@db_name,
+		"Database name not entered"
 
 		@db_username = prompt "Database Username:",
-				@db_username,
-				"Database username not entered"
+		@db_username,
+		"Database username not entered"
 
 		@db_password = prompt "Database Password:",
-				@db_password,
-				"Database Password not entered"
+		@db_password,
+		"Database Password not entered"
+	end
+
+	def guess_database_from_rails_config
+		rails_db_config_file = "#{working_dir}/config/database.yml"
+
+		if File.exist? rails_db_config_file
+
+			# Read database.yml
+			db_config = YAML.load_file(rails_db_config_file)
+
+			dev_config = db_config["development"]
+			if dev_config["adapter"] == "postgresql"
+				@db_name = dev_config["database"]
+				@db_username = dev_config["username"]
+				@db_password = dev_config["password"]
+			end
+		end
 	end
 
 	def working_dir
-		 Dir.getwd
+		Dir.getwd
 	end
 
 	def prompt(message, current_value, error_message)
@@ -97,21 +105,24 @@ class HerokuPgLoader
 	end
 
 	def get_app_name
-		detect_app_name
+		guess_app_name
 
 		@heroku_app_name = prompt "Heroku App Name:",
-				@heroku_app_name,
-				"No Heroku App Name entered"
+		@heroku_app_name,
+		"No Heroku App Name entered"
 	end
 
-	def detect_app_name
-		git_remote = `git remote -v | grep heroku`
+	def guess_app_name
 
-		/git@heroku.com:(\w*).git/.match(git_remote)
-		@heroku_app_name = $1
+		if File.exist?("#{working_dir}/.git")
+			git_remote = `git remote -v | grep heroku`
 
-		if @heroku_app_name
-			puts "Heroku App Detected: #{@heroku_app_name}"
+			/git@heroku.com:(\w*).git/.match(git_remote)
+			@heroku_app_name = $1
+
+			if @heroku_app_name
+				puts "Heroku App Detected: #{@heroku_app_name}"
+			end
 		end
 	end
 
