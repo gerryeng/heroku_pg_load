@@ -6,10 +6,10 @@ A simple command line utility that downloads your Heroku Postgres live database 
 
 ## Installation
 
-    gem install heroku_pg_loader
+    $ gem install heroku_pg_loader
 
     # If you are using rbenv
-    rbenv rehash
+    $ rbenv rehash
 
 
 ## How to Use
